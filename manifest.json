@@ -1,0 +1,10 @@
+{
+  "name": "Football Hub",
+  "short_name": "Football Hub",
+  "description": "Football Tournament Management App",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#087f4e",
+  "orientation": "portrait"
+}
