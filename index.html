@@ -1,0 +1,1742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Football Tournament Manager</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+font-family:Arial,sans-serif;
+background:#f3f6f8;
+color:#17202a
+}
+header{
+background:linear-gradient(135deg,#061b30,#087443);
+color:white;
+padding:24px 15px;
+text-align:center
+}
+header h1{font-size:28px}
+header p{margin-top:6px;color:#d9eee5}
+
+nav{
+display:flex;
+overflow-x:auto;
+background:white;
+position:sticky;
+top:0;
+z-index:20;
+box-shadow:0 2px 8px #0002
+}
+nav button{
+background:white;
+border:0;
+padding:15px 17px;
+font-weight:bold;
+white-space:nowrap
+}
+nav button.active{
+color:#087443;
+border-bottom:3px solid #087443
+}
+
+.container{max-width:1150px;margin:auto;padding:18px}
+.page{display:none}
+.page.active{display:block}
+
+.cards{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+gap:14px;
+margin-bottom:18px
+}
+.card,.section{
+background:white;
+border-radius:14px;
+padding:18px;
+box-shadow:0 3px 12px #00000010
+}
+.card h3{font-size:14px;color:#68737d;margin-bottom:8px}
+.big{font-size:30px;font-weight:bold;color:#087443}
+
+.section{margin-bottom:18px}
+.section h2{margin-bottom:15px}
+
+.form-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:10px
+}
+
+input,select{
+width:100%;
+padding:11px;
+border:1px solid #d5dadd;
+border-radius:8px;
+background:white
+}
+
+button{
+border:0;
+border-radius:8px;
+padding:10px 14px;
+cursor:pointer
+}
+.primary{background:#087443;color:white}
+.secondary{background:#e9eef0}
+.danger{background:#e74c3c;color:white}
+.warning{background:#f39c12;color:white}
+
+.actions{
+display:flex;
+gap:6px;
+flex-wrap:wrap;
+margin-top:9px
+}
+.actions button{font-size:12px;padding:7px 10px}
+
+table{
+width:100%;
+border-collapse:collapse
+}
+th,td{
+padding:11px 7px;
+border-bottom:1px solid #edf0f2;
+text-align:center
+}
+th{
+background:#f4f7f8;
+font-size:13px
+}
+td:first-child,th:first-child{text-align:left}
+
+.badge{
+padding:4px 8px;
+border-radius:15px;
+font-size:11px;
+background:#e8f5ef;
+color:#087443
+}
+
+.match{
+background:white;
+border:1px solid #e8ecee;
+border-radius:12px;
+padding:14px;
+margin-bottom:10px
+}
+.match-main{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:10px
+}
+.team{
+flex:1;
+font-weight:bold
+}
+.team.right{text-align:right}
+.score{
+font-size:21px;
+font-weight:bold;
+min-width:90px;
+text-align:center
+}
+.match-info{
+text-align:center;
+font-size:12px;
+color:#737d83;
+margin-top:5px
+}
+
+.empty{
+text-align:center;
+padding:25px;
+color:#7b858b
+}
+
+.modal{
+display:none;
+position:fixed;
+inset:0;
+background:#0008;
+z-index:100;
+align-items:center;
+justify-content:center;
+padding:15px
+}
+.modal-box{
+background:white;
+border-radius:15px;
+padding:20px;
+width:100%;
+max-width:550px;
+max-height:90vh;
+overflow:auto
+}
+.modal-box h2{margin-bottom:15px}
+.close{
+float:right;
+background:#eee
+}
+
+.row{
+display:grid;
+grid-template-columns:1fr auto;
+gap:7px;
+margin-bottom:8px
+}
+
+.player-line{
+display:grid;
+grid-template-columns:1fr auto;
+gap:8px;
+margin-bottom:7px
+}
+
+.tabs{
+display:flex;
+gap:7px;
+flex-wrap:wrap;
+margin-bottom:15px
+}
+.tabs button.active{
+background:#087443;
+color:white
+}
+
+@media(max-width:600px){
+header h1{font-size:23px}
+.container{padding:11px}
+.section,.card{padding:14px}
+th,td{font-size:11px;padding:8px 4px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>⚽ Football Hub</h1>
+<p id="headerTournament">My Tournament</p>
+</header>
+
+<nav>
+<button class="active" onclick="page('dashboard',this)">Dashboard</button>
+<button onclick="page('tournament',this)">Tournament</button>
+<button onclick="page('teams',this)">Teams</button>
+<button onclick="page('players',this)">Players</button>
+<button onclick="page('matches',this)">Matches</button>
+<button onclick="page('table',this)">Table</button>
+<button onclick="page('stats',this)">Top Players</button>
+</nav>
+
+<div class="container">
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="page active">
+
+<div class="cards">
+<div class="card"><h3>Teams</h3><div class="big" id="dTeams">0</div></div>
+<div class="card"><h3>Players</h3><div class="big" id="dPlayers">0</div></div>
+<div class="card"><h3>Matches</h3><div class="big" id="dMatches">0</div></div>
+<div class="card"><h3>Goals</h3><div class="big" id="dGoals">0</div></div>
+</div>
+
+<div class="section">
+<h2>🏆 Tournament</h2>
+<h3 id="dashTournament">My Tournament</h3>
+</div>
+
+<div class="section">
+<h2>🔥 Recent Matches</h2>
+<div id="recent"></div>
+</div>
+
+</div>
+
+
+<!-- TOURNAMENT -->
+<div id="tournament" class="page">
+
+<div class="section">
+<h2>🏆 Tournament Settings</h2>
+
+<div class="form-grid">
+<input id="tName" placeholder="Tournament name">
+<input id="tLocation" placeholder="Location">
+<input id="tDate" type="date">
+<button class="primary" onclick="saveTournament()">Save</button>
+</div>
+
+<br>
+
+<button class="danger" onclick="resetTournament()">
+Reset All Tournament Data
+</button>
+
+</div>
+
+<div class="section">
+<h2>⚡ Auto Fixture Generator</h2>
+<p style="margin-bottom:12px;color:#68737d">
+সব team-এর সাথে সব team-এর ম্যাচ automatically তৈরি হবে।
+</p>
+
+<button class="primary" onclick="generateFixtures()">
+Generate All Fixtures
+</button>
+</div>
+
+</div>
+
+
+<!-- TEAMS -->
+<div id="teams" class="page">
+
+<div class="section">
+<h2>👥 Add Team</h2>
+
+<div class="form-grid">
+<input id="teamName" placeholder="Team name">
+<input id="teamShort" placeholder="Short name">
+<button class="primary" onclick="addTeam()">Add Team</button>
+</div>
+</div>
+
+<div class="section">
+<h2>Teams</h2>
+<div id="teamList"></div>
+</div>
+
+</div>
+
+
+<!-- PLAYERS -->
+<div id="players" class="page">
+
+<div class="section">
+<h2>👤 Add Player</h2>
+
+<div class="form-grid">
+
+<input id="playerName" placeholder="Player name">
+
+<select id="playerTeam">
+<option value="">Select Team</option>
+</select>
+
+<input id="playerNumber" type="number" placeholder="Jersey number">
+
+<select id="playerPosition">
+<option>Forward</option>
+<option>Midfielder</option>
+<option>Defender</option>
+<option>Goalkeeper</option>
+</select>
+
+<button class="primary" onclick="addPlayer()">Add Player</button>
+
+</div>
+</div>
+
+<div class="section">
+<h2>Players</h2>
+<input id="playerSearch" placeholder="🔎 Search player..." oninput="renderPlayers()">
+<br><br>
+<div id="playerList"></div>
+</div>
+
+</div>
+
+
+<!-- MATCHES -->
+<div id="matches" class="page">
+
+<div class="section">
+
+<h2>📅 Create Fixture</h2>
+
+<div class="form-grid">
+
+<select id="homeTeam">
+<option value="">Home Team</option>
+</select>
+
+<select id="awayTeam">
+<option value="">Away Team</option>
+</select>
+
+<input id="matchDate" type="date">
+<input id="matchTime" type="time">
+
+<button class="primary" onclick="addMatch()">
+Create Match
+</button>
+
+</div>
+
+</div>
+
+<div class="section">
+<h2>⚽ All Matches</h2>
+<div id="matchList"></div>
+</div>
+
+</div>
+
+
+<!-- TABLE -->
+<div id="table" class="page">
+
+<div class="section">
+
+<h2>📊 Points Table</h2>
+
+<div style="overflow-x:auto">
+
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Team</th>
+<th>MP</th>
+<th>W</th>
+<th>D</th>
+<th>L</th>
+<th>GF</th>
+<th>GA</th>
+<th>GD</th>
+<th>PTS</th>
+</tr>
+</thead>
+
+<tbody id="pointsTable"></tbody>
+
+</table>
+
+</div>
+</div>
+</div>
+
+
+<!-- STATS -->
+<div id="stats" class="page">
+
+<div class="section">
+<h2>🥇 Top Scorers</h2>
+<div id="scorers"></div>
+</div>
+
+<div class="section">
+<h2>🎯 Top Assists</h2>
+<div id="assists"></div>
+</div>
+
+<div class="section">
+<h2>⭐ Man of the Match</h2>
+<div id="motmList"></div>
+</div>
+
+<div class="section">
+<h2>🧤 Goalkeepers</h2>
+<div id="keepers"></div>
+</div>
+
+</div>
+
+</div>
+
+
+<!-- MATCH RESULT MODAL -->
+<div class="modal" id="resultModal">
+
+<div class="modal-box">
+
+<button class="close" onclick="closeModal()">✕</button>
+
+<h2>📝 Match Result</h2>
+
+<input type="hidden" id="resultMatch">
+
+<div class="form-grid">
+<input id="homeScore" type="number" min="0" placeholder="Home Score">
+<input id="awayScore" type="number" min="0" placeholder="Away Score">
+</div>
+
+<br>
+
+<h3>⚽ Goal Scorers</h3>
+<div id="scorerRows"></div>
+<button class="secondary" onclick="addScorerRow()">+ Add Goal</button>
+
+<br><br>
+
+<h3>🎯 Assists</h3>
+<div id="assistRows"></div>
+<button class="secondary" onclick="addAssistRow()">+ Add Assist</button>
+
+<br><br>
+
+<h3>⭐ Man of the Match</h3>
+<select id="motmSelect">
+<option value="">Select Player</option>
+</select>
+
+<br><br>
+
+<button class="primary" onclick="saveResult()">
+Save Match Result
+</button>
+
+</div>
+</div>
+
+
+<!-- EDIT TEAM MODAL -->
+<div class="modal" id="editTeamModal">
+
+<div class="modal-box">
+
+<button class="close" onclick="closeEditTeam()">✕</button>
+
+<h2>✏️ Edit Team</h2>
+
+<input type="hidden" id="editTeamId">
+
+<input id="editTeamName" placeholder="Team name">
+<br><br>
+<input id="editTeamShort" placeholder="Short name">
+
+<br><br>
+
+<button class="primary" onclick="saveEditedTeam()">
+Save Changes
+</button>
+
+</div>
+</div>
+
+
+<!-- EDIT PLAYER MODAL -->
+<div class="modal" id="editPlayerModal">
+
+<div class="modal-box">
+
+<button class="close" onclick="closeEditPlayer()">✕</button>
+
+<h2>✏️ Edit Player</h2>
+
+<input type="hidden" id="editPlayerId">
+
+<input id="editPlayerName" placeholder="Player name">
+<br><br>
+
+<select id="editPlayerTeam"></select>
+<br><br>
+
+<input id="editPlayerNumber" type="number" placeholder="Jersey number">
+<br><br>
+
+<select id="editPlayerPosition">
+<option>Forward</option>
+<option>Midfielder</option>
+<option>Defender</option>
+<option>Goalkeeper</option>
+</select>
+
+<br><br>
+
+<button class="primary" onclick="saveEditedPlayer()">
+Save Changes
+</button>
+
+</div>
+</div>
+
+
+<script>
+
+/* =========================
+DATABASE
+========================= */
+
+let data=JSON.parse(localStorage.getItem("footballHubData"))||{
+
+tournament:{
+name:"My Tournament",
+location:"",
+date:""
+},
+
+teams:[],
+players:[],
+matches:[]
+
+};
+
+
+function save(){
+localStorage.setItem(
+"footballHubData",
+JSON.stringify(data)
+);
+}
+
+
+/* =========================
+PAGE
+========================= */
+
+function page(id,btn){
+
+document.querySelectorAll(".page")
+.forEach(x=>x.classList.remove("active"));
+
+document.getElementById(id)
+.classList.add("active");
+
+document.querySelectorAll("nav button")
+.forEach(x=>x.classList.remove("active"));
+
+btn.classList.add("active");
+
+renderAll();
+
+}
+
+
+/* =========================
+TOURNAMENT
+========================= */
+
+function saveTournament(){
+
+let name=document.getElementById("tName").value.trim();
+
+if(!name){
+alert("Tournament name লিখো");
+return;
+}
+
+data.tournament.name=name;
+data.tournament.location=
+document.getElementById("tLocation").value;
+data.tournament.date=
+document.getElementById("tDate").value;
+
+save();
+renderAll();
+
+alert("Tournament saved!");
+
+}
+
+
+function resetTournament(){
+
+if(!confirm(
+"সব Team, Player, Match এবং Table data delete হবে। Continue?"
+))return;
+
+localStorage.removeItem("footballHubData");
+
+location.reload();
+
+}
+
+
+/* =========================
+TEAM
+========================= */
+
+function addTeam(){
+
+let name=document.getElementById("teamName").value.trim();
+
+if(!name){
+alert("Team name লিখো");
+return;
+}
+
+data.teams.push({
+
+id:Date.now(),
+name:name,
+short:
+document.getElementById("teamShort").value.trim() ||
+name.substring(0,3).toUpperCase()
+
+});
+
+save();
+
+document.getElementById("teamName").value="";
+document.getElementById("teamShort").value="";
+
+renderAll();
+
+}
+
+
+function editTeam(id){
+
+let t=data.teams.find(x=>x.id===id);
+
+if(!t)return;
+
+document.getElementById("editTeamId").value=id;
+document.getElementById("editTeamName").value=t.name;
+document.getElementById("editTeamShort").value=t.short;
+
+document.getElementById("editTeamModal").style.display="flex";
+
+}
+
+
+function saveEditedTeam(){
+
+let id=Number(document.getElementById("editTeamId").value);
+
+let t=data.teams.find(x=>x.id===id);
+
+if(!t)return;
+
+t.name=document.getElementById("editTeamName").value.trim();
+
+t.short=document.getElementById("editTeamShort").value.trim();
+
+save();
+
+closeEditTeam();
+
+renderAll();
+
+}
+
+
+function closeEditTeam(){
+document.getElementById("editTeamModal").style.display="none";
+}
+
+
+function deleteTeam(id){
+
+if(!confirm("এই team delete করবে?"))return;
+
+data.teams=data.teams.filter(x=>x.id!==id);
+
+data.players=data.players.filter(x=>x.teamId!==id);
+
+data.matches=data.matches.filter(
+x=>x.home!==id && x.away!==id
+);
+
+save();
+renderAll();
+
+}
+
+
+/* =========================
+PLAYER
+========================= */
+
+function addPlayer(){
+
+let name=document.getElementById("playerName").value.trim();
+
+let team=Number(document.getElementById("playerTeam").value);
+
+if(!name||!team){
+alert("Player name এবং team নির্বাচন করো");
+return;
+}
+
+data.players.push({
+
+id:Date.now(),
+name:name,
+teamId:team,
+number:document.getElementById("playerNumber").value,
+position:document.getElementById("playerPosition").value,
+goals:0,
+assists:0,
+motm:0
+
+});
+
+save();
+
+document.getElementById("playerName").value="";
+document.getElementById("playerNumber").value="";
+
+renderAll();
+
+}
+
+
+function editPlayer(id){
+
+let p=data.players.find(x=>x.id===id);
+
+if(!p)return;
+
+document.getElementById("editPlayerId").value=id;
+document.getElementById("editPlayerName").value=p.name;
+document.getElementById("editPlayerNumber").value=p.number;
+document.getElementById("editPlayerPosition").value=p.position;
+
+let select=document.getElementById("editPlayerTeam");
+
+select.innerHTML=data.teams.map(t=>
+`<option value="${t.id}">
+${escape(t.name)}
+</option>`
+).join("");
+
+select.value=p.teamId;
+
+document.getElementById("editPlayerModal").style.display="flex";
+
+}
+
+
+function saveEditedPlayer(){
+
+let id=Number(
+document.getElementById("editPlayerId").value
+);
+
+let p=data.players.find(x=>x.id===id);
+
+if(!p)return;
+
+p.name=document.getElementById("editPlayerName").value.trim();
+p.teamId=Number(document.getElementById("editPlayerTeam").value);
+p.number=document.getElementById("editPlayerNumber").value;
+p.position=document.getElementById("editPlayerPosition").value;
+
+save();
+
+closeEditPlayer();
+
+renderAll();
+
+}
+
+
+function closeEditPlayer(){
+document.getElementById("editPlayerModal").style.display="none";
+}
+
+
+function deletePlayer(id){
+
+if(!confirm("Player delete করবে?"))return;
+
+data.players=data.players.filter(x=>x.id!==id);
+
+save();
+renderAll();
+
+}
+
+
+/* =========================
+TEAM SELECTS
+========================= */
+
+function fillSelects(){
+
+let options=data.teams.map(t=>
+`<option value="${t.id}">
+${escape(t.name)}
+</option>`
+).join("");
+
+document.getElementById("playerTeam").innerHTML=
+'<option value="">Select Team</option>'+options;
+
+document.getElementById("homeTeam").innerHTML=
+'<option value="">Home Team</option>'+options;
+
+document.getElementById("awayTeam").innerHTML=
+'<option value="">Away Team</option>'+options;
+
+}
+
+
+/* =========================
+MATCH
+========================= */
+
+function addMatch(){
+
+let home=Number(document.getElementById("homeTeam").value);
+let away=Number(document.getElementById("awayTeam").value);
+
+if(!home||!away){
+alert("দুইটা team নির্বাচন করো");
+return;
+}
+
+if(home===away){
+alert("একই team-এর match হতে পারবে না");
+return;
+}
+
+data.matches.push({
+
+id:Date.now(),
+home:home,
+away:away,
+date:document.getElementById("matchDate").value,
+time:document.getElementById("matchTime").value,
+played:false,
+homeScore:0,
+awayScore:0,
+scorers:[],
+assists:[],
+motm:null
+
+});
+
+save();
+renderAll();
+
+}
+
+
+function deleteMatch(id){
+
+if(!confirm("Match delete করবে?"))return;
+
+data.matches=data.matches.filter(x=>x.id!==id);
+
+recalculate();
+
+save();
+renderAll();
+
+}
+
+
+/* =========================
+AUTO FIXTURE
+========================= */
+
+function generateFixtures(){
+
+if(data.teams.length<2){
+alert("কমপক্ষে ২টি team লাগবে");
+return;
+}
+
+if(data.matches.length &&
+!confirm("আগের matches থাকবে। নতুন fixtures add করবো?"))
+return;
+
+let count=0;
+
+for(let i=0;i<data.teams.length;i++){
+
+for(let j=i+1;j<data.teams.length;j++){
+
+let exists=data.matches.some(m=>
+(m.home===data.teams[i].id &&
+m.away===data.teams[j].id)||
+(m.home===data.teams[j].id &&
+m.away===data.teams[i].id)
+);
+
+if(!exists){
+
+data.matches.push({
+
+id:Date.now()+count,
+home:data.teams[i].id,
+away:data.teams[j].id,
+date:"",
+time:"",
+played:false,
+homeScore:0,
+awayScore:0,
+scorers:[],
+assists:[],
+motm:null
+
+});
+
+count++;
+
+}
+
+}
+
+}
+
+save();
+renderAll();
+
+alert(count+"টি fixture তৈরি হয়েছে!");
+
+}
+
+
+/* =========================
+MATCH RESULT
+========================= */
+
+function openResult(id){
+
+let m=data.matches.find(x=>x.id===id);
+
+if(!m)return;
+
+document.getElementById("resultMatch").value=id;
+
+document.getElementById("homeScore").value=
+m.played?m.homeScore:"";
+
+document.getElementById("awayScore").value=
+m.played?m.awayScore:"";
+
+document.getElementById("scorerRows").innerHTML="";
+document.getElementById("assistRows").innerHTML="";
+
+m.scorers.forEach(id=>addScorerRow(id));
+m.assists.forEach(id=>addAssistRow(id));
+
+if(!m.scorers.length)addScorerRow();
+if(!m.assists.length)addAssistRow();
+
+fillMotm();
+
+document.getElementById("motmSelect").value=
+m.motm||"";
+
+document.getElementById("resultModal").style.display="flex";
+
+}
+
+
+function closeModal(){
+document.getElementById("resultModal").style.display="none";
+}
+
+
+/* =========================
+PLAYER DROPDOWN
+========================= */
+
+function playerOptions(selected=""){
+
+return '<option value="">Select Player</option>'+
+data.players.map(p=>
+`<option value="${p.id}"
+${Number(selected)===p.id?"selected":""}>
+${escape(p.name)} — ${escape(teamName(p.teamId))}
+</option>`
+).join("");
+
+}
+
+
+function addScorerRow(selected=""){
+
+let div=document.createElement("div");
+
+div.className="player-line";
+
+div.innerHTML=`
+
+<select class="scorerSelect">
+${playerOptions(selected)}
+</select>
+
+<button class="danger"
+onclick="this.parentElement.remove()">
+✕
+</button>
+
+`;
+
+document.getElementById("scorerRows").appendChild(div);
+
+}
+
+
+function addAssistRow(selected=""){
+
+let div=document.createElement("div");
+
+div.className="player-line";
+
+div.innerHTML=`
+
+<select class="assistSelect">
+${playerOptions(selected)}
+</select>
+
+<button class="danger"
+onclick="this.parentElement.remove()">
+✕
+</button>
+
+`;
+
+document.getElementById("assistRows").appendChild(div);
+
+}
+
+
+function fillMotm(){
+
+document.getElementById("motmSelect").innerHTML=
+playerOptions();
+
+}
+
+
+function saveResult(){
+
+let id=Number(
+document.getElementById("resultMatch").value
+);
+
+let m=data.matches.find(x=>x.id===id);
+
+if(!m)return;
+
+m.homeScore=
+Number(document.getElementById("homeScore").value)||0;
+
+m.awayScore=
+Number(document.getElementById("awayScore").value)||0;
+
+m.scorers=[
+...document.querySelectorAll(".scorerSelect")
+]
+.map(x=>Number(x.value))
+.filter(Boolean);
+
+m.assists=[
+...document.querySelectorAll(".assistSelect")
+]
+.map(x=>Number(x.value))
+.filter(Boolean);
+
+m.motm=
+Number(document.getElementById("motmSelect").value)||null;
+
+m.played=true;
+
+recalculate();
+
+save();
+
+closeModal();
+
+renderAll();
+
+}
+
+
+/* =========================
+PLAYER STATS
+========================= */
+
+function recalculate(){
+
+data.players.forEach(p=>{
+p.goals=0;
+p.assists=0;
+p.motm=0;
+});
+
+data.matches.forEach(m=>{
+
+if(!m.played)return;
+
+m.scorers.forEach(id=>{
+
+let p=data.players.find(x=>x.id===id);
+
+if(p)p.goals++;
+
+});
+
+m.assists.forEach(id=>{
+
+let p=data.players.find(x=>x.id===id);
+
+if(p)p.assists++;
+
+});
+
+if(m.motm){
+
+let p=data.players.find(x=>x.id===m.motm);
+
+if(p)p.motm++;
+
+}
+
+});
+
+}
+
+
+/* =========================
+TABLE
+========================= */
+
+function getTable(){
+
+let arr=data.teams.map(t=>({
+
+id:t.id,
+name:t.name,
+mp:0,w:0,d:0,l:0,
+gf:0,ga:0,gd:0,pts:0
+
+}));
+
+data.matches.forEach(m=>{
+
+if(!m.played)return;
+
+let h=arr.find(x=>x.id===m.home);
+let a=arr.find(x=>x.id===m.away);
+
+if(!h||!a)return;
+
+h.mp++;
+a.mp++;
+
+h.gf+=m.homeScore;
+h.ga+=m.awayScore;
+
+a.gf+=m.awayScore;
+a.ga+=m.homeScore;
+
+if(m.homeScore>m.awayScore){
+
+h.w++;
+a.l++;
+h.pts+=3;
+
+}else if(m.homeScore<m.awayScore){
+
+a.w++;
+h.l++;
+a.pts+=3;
+
+}else{
+
+h.d++;
+a.d++;
+h.pts++;
+a.pts++;
+
+}
+
+});
+
+arr.forEach(t=>{
+t.gd=t.gf-t.ga;
+});
+
+arr.sort((a,b)=>
+b.pts-a.pts||
+b.gd-a.gd||
+b.gf-a.gf
+);
+
+return arr;
+
+}
+
+
+/* =========================
+RENDER TABLE
+========================= */
+
+function renderTable(){
+
+let tbody=document.getElementById("pointsTable");
+
+let arr=getTable();
+
+if(!arr.length){
+
+tbody.innerHTML=
+'<tr><td colspan="10">No teams yet</td></tr>';
+
+return;
+
+}
+
+tbody.innerHTML=arr.map((t,i)=>`
+
+<tr>
+
+<td><b>${i+1}</b></td>
+<td><b>${escape(t.name)}</b></td>
+<td>${t.mp}</td>
+<td>${t.w}</td>
+<td>${t.d}</td>
+<td>${t.l}</td>
+<td>${t.gf}</td>
+<td>${t.ga}</td>
+<td>${t.gd}</td>
+<td><b>${t.pts}</b></td>
+
+</tr>
+
+`).join("");
+
+}
+
+
+/* =========================
+STATS
+========================= */
+
+function ranking(list,key,title){
+
+if(!list.length)
+return '<div class="empty">No data</div>';
+
+return `
+
+<table>
+
+<thead>
+<tr>
+<th>#</th>
+<th>Player</th>
+<th>Team</th>
+<th>${title}</th>
+</tr>
+</thead>
+
+<tbody>
+
+${list.slice(0,10).map((p,i)=>`
+
+<tr>
+
+<td>${i+1}</td>
+
+<td>
+<b>${escape(p.name)}</b>
+</td>
+
+<td>
+${escape(teamName(p.teamId))}
+</td>
+
+<td>
+<b>${p[key]}</b>
+</td>
+
+</tr>
+
+`).join("")}
+
+</tbody>
+
+</table>
+
+`;
+
+}
+
+
+function renderStats(){
+
+let scorers=[...data.players]
+.sort((a,b)=>b.goals-a.goals);
+
+let assists=[...data.players]
+.sort((a,b)=>b.assists-a.assists);
+
+let motm=[...data.players]
+.sort((a,b)=>b.motm-a.motm);
+
+let keepers=data.players
+.filter(p=>p.position==="Goalkeeper")
+.sort((a,b)=>b.motm-a.motm);
+
+document.getElementById("scorers").innerHTML=
+ranking(scorers,"goals","Goals");
+
+document.getElementById("assists").innerHTML=
+ranking(assists,"assists","Assists");
+
+document.getElementById("motmList").innerHTML=
+ranking(motm,"motm","MOM");
+
+document.getElementById("keepers").innerHTML=
+ranking(keepers,"motm","MOM");
+
+}
+
+
+/* =========================
+RENDER TEAMS
+========================= */
+
+function renderTeams(){
+
+let el=document.getElementById("teamList");
+
+if(!data.teams.length){
+
+el.innerHTML='<div class="empty">No teams yet</div>';
+
+return;
+
+}
+
+el.innerHTML=data.teams.map(t=>`
+
+<div class="card" style="margin-bottom:10px">
+
+<b>${escape(t.name)}</b>
+
+<span class="badge">
+${escape(t.short)}
+</span>
+
+<div class="actions">
+
+<button class="warning"
+onclick="editTeam(${t.id})">
+Edit
+</button>
+
+<button class="danger"
+onclick="deleteTeam(${t.id})">
+Delete
+</button>
+
+</div>
+
+</div>
+
+`).join("");
+
+}
+
+
+/* =========================
+RENDER PLAYERS
+========================= */
+
+function renderPlayers(){
+
+let el=document.getElementById("playerList");
+
+let search=
+(document.getElementById("playerSearch")?.value||"")
+.toLowerCase();
+
+let list=data.players.filter(p=>
+p.name.toLowerCase().includes(search)
+);
+
+if(!list.length){
+
+el.innerHTML='<div class="empty">No players found</div>';
+
+return;
+
+}
+
+el.innerHTML=`
+
+<div style="overflow-x:auto">
+
+<table>
+
+<thead>
+<tr>
+<th>Player</th>
+<th>Team</th>
+<th>Position</th>
+<th>G</th>
+<th>A</th>
+<th>MOM</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody>
+
+${list.map(p=>`
+
+<tr>
+
+<td>
+${p.number?"#"+p.number+" ":""}
+<b>${escape(p.name)}</b>
+</td>
+
+<td>${escape(teamName(p.teamId))}</td>
+
+<td>${p.position}</td>
+
+<td>${p.goals}</td>
+<td>${p.assists}</td>
+<td>${p.motm}</td>
+
+<td>
+
+<button class="warning"
+onclick="editPlayer(${p.id})">
+Edit
+</button>
+
+<button class="danger"
+onclick="deletePlayer(${p.id})">
+Delete
+</button>
+
+</td>
+
+</tr>
+
+`).join("")}
+
+</tbody>
+
+</table>
+
+</div>
+
+`;
+
+}
+
+
+/* =========================
+RENDER MATCHES
+========================= */
+
+function renderMatches(){
+
+let el=document.getElementById("matchList");
+
+if(!data.matches.length){
+
+el.innerHTML='<div class="empty">No matches yet</div>';
+
+return;
+
+}
+
+el.innerHTML=data.matches.map(m=>{
+
+let h=teamName(m.home);
+let a=teamName(m.away);
+
+return `
+
+<div class="match">
+
+<div class="match-main">
+
+<div class="team">
+${escape(h)}
+</div>
+
+<div>
+
+<div class="score">
+
+${m.played
+?m.homeScore+" - "+m.awayScore
+:"VS"}
+
+</div>
+
+<div class="match-info">
+
+${m.date||"Date not set"}
+${m.time?" • "+m.time:""}
+
+</div>
+
+</div>
+
+<div class="team right">
+${escape(a)}
+</div>
+
+</div>
+
+<div class="actions">
+
+<button class="primary"
+onclick="openResult(${m.id})">
+
+${m.played?"Edit Result":"Enter Result"}
+
+</button>
+
+<button class="danger"
+onclick="deleteMatch(${m.id})">
+
+Delete
+
+</button>
+
+</div>
+
+</div>
+
+`;
+
+}).join("");
+
+}
+
+
+/* =========================
+DASHBOARD
+========================= */
+
+function renderDashboard(){
+
+document.getElementById("headerTournament").textContent=
+data.tournament.name;
+
+document.getElementById("dashTournament").textContent=
+data.tournament.name;
+
+document.getElementById("dTeams").textContent=
+data.teams.length;
+
+document.getElementById("dPlayers").textContent=
+data.players.length;
+
+document.getElementById("dMatches").textContent=
+data.matches.length;
+
+let goals=data.matches.reduce(
+(s,m)=>s+(m.played?m.homeScore+m.awayScore:0),0
+);
+
+document.getElementById("dGoals").textContent=goals;
+
+let recent=data.matches
+.slice()
+.reverse()
+.slice(0,5);
+
+let el=document.getElementById("recent");
+
+if(!recent.length){
+
+el.innerHTML='<div class="empty">No matches yet</div>';
+
+return;
+
+}
+
+el.innerHTML=recent.map(m=>`
+
+<div class="match">
+
+<div class="match-main">
+
+<div class="team">
+${escape(teamName(m.home))}
+</div>
+
+<div class="score">
+
+${m.played
+?m.homeScore+" - "+m.awayScore
+:"VS"}
+
+</div>
+
+<div class="team right">
+${escape(teamName(m.away))}
+</div>
+
+</div>
+
+</div>
+
+`).join("");
+
+}
+
+
+/* =========================
+HELPERS
+========================= */
+
+function teamName(id){
+
+let t=data.teams.find(x=>x.id===Number(id));
+
+return t?t.name:"Unknown";
+
+}
+
+
+function escape(str){
+
+return String(str||"")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+
+}
+
+
+/* =========================
+RENDER ALL
+========================= */
+
+function renderAll(){
+
+recalculate();
+
+fillSelects();
+
+renderTeams();
+
+renderPlayers();
+
+renderMatches();
+
+renderTable();
+
+renderStats();
+
+renderDashboard();
+
+}
+
+
+/* =========================
+START
+========================= */
+
+renderAll();
+
+</script>
+
+</body>
+</html>
